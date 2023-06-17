@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedInteger('tourist_id');
             $table->unsignedBigInteger('restaurant_id');
             $table->integer('people_count');
-            $table->date('booking_date');
+            $table->dateTime('booking_date');
             $table->timestamps();
 
             $table->foreign('tourist_id')->references('id')->on('tourists')->onDelete('cascade');

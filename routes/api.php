@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Admincontroller;
 
+use App\Http\Controllers\Restaurant\RestaurantBookingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -39,6 +40,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+/*
+|--------------------------------------------------------------------------
+| API Routes For Tourist Authentication.
+|--------------------------------------------------------------------------
+*/
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
@@ -46,8 +52,9 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
     Route::get('me', 'me');
-
 });
+
+
 Route::controller(Touristcontroller::class)->group(function () {
     Route::post('tourist/login', 'login');
     Route::post('tourist/register', 'register');
@@ -56,14 +63,15 @@ Route::controller(Touristcontroller::class)->group(function () {
     Route::get('tourist/me', 'me');
 
 });
+
 Route::controller(Admincontroller::class)->group(function () {
     Route::post('admin/login', 'login');
     Route::post('admin/register', 'register');
     Route::post('admin/logout', 'logout');
     Route::post('admin/refresh', 'refresh');
     Route::get('admin/me', 'me');
-
 });
+
 Route::get('/restaurants', [RestaurantController::class, 'index']);
 Route::post('/restaurants', [RestaurantController::class, 'store']);
 Route::get('/restaurants/{id}', [RestaurantController::class, 'show']);
@@ -78,15 +86,21 @@ Route::put('/restaurant-images/{id}', [RestaurantImageController::class, 'update
 Route::delete('/restaurant-images/{id}', [RestaurantImageController::class, 'destroy']);
 
 //
-Route::post('/restaurants/{restaurant}/bookings', [\App\Http\Controllers\Restaurant\RestaurantBookingController::class, 'store']);
+//Route::post('/restaurants/{restaurant}/bookings', [\App\Http\Controllers\Restaurant\RestaurantBookingController::class, 'store']);
 
-Route::group(['middleware' => 'jwt.auth'], function () {
-    Route::get('/bookings', 'RestaurantBookingController@index');
-Route::post('/bookings', 'RestaurantBookingController@store');
-Route::get('/bookings/{id}', 'RestaurantBookingController@show');
-Route::put('/bookings/{id}', 'RestaurantBookingController@update');
-Route::delete('/bookings/{id}', 'RestaurantBookingController@destroy');
-});
+//Route::group(['middleware' => 'jwt.auth'], function () {
+//    Route::get('/bookings', 'RestaurantBookingController@index');
+//Route::post('/bookings', 'RestaurantBookingController@store');
+//Route::get('/bookings/{id}', 'RestaurantBookingController@show');
+//Route::put('/bookings/{id}', 'RestaurantBookingController@update');
+//Route::delete('/bookings/{id}', 'RestaurantBookingController@destroy');
+//});
+
+Route::middleware('auth:api')->post('/booking', [RoomBookingController::class, 'store']);
+Route::middleware('auth:api')->post('/booking-rest', [RestaurantBookingController::class, 'store']);
+Route::middleware('auth:api')->get('/tourist-booking', [RestaurantBookingController::class, 'store']);
+
+
 
 
 

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class HotelSeeder extends Seeder
 {
@@ -37,7 +38,7 @@ class HotelSeeder extends Seeder
             [
                 'name'=>'Turquoise pyramids & Grand Egyptian museum view hotel',
                 'image'=>'public/images/hotels/TurquoiseHotel.jpg',
-                
+
             ],
             [
 
@@ -46,6 +47,16 @@ class HotelSeeder extends Seeder
 
             ],
 
+        ]);
+
+        DB::table('tourists')->insert([
+            'first_name' => 'admin',
+            'last_name' => 'admin',
+            'email' => 'admin@gmail.com',
+            'password' => Hash::make('password'),
+            'SSN' => '13568484',
+            'gender' => 'male',
+            'phone' => '316456843156',
         ]);
     }
 }

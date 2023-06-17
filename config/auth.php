@@ -38,11 +38,11 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'tourists',
         ],
         'api' => [
             'driver' => 'jwt',
-            'provider' => 'users',
+            'provider' => 'tourists',
     ],
     ],
 
@@ -64,9 +64,9 @@ return [
     */
 
     'providers' => [
-        'users' => [
+        'tourists' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model' => App\Models\Tourist::class,
         ],
 
         // 'users' => [
@@ -95,8 +95,8 @@ return [
     */
 
     'passwords' => [
-        'users' => [
-            'provider' => 'users',
+        'tourists' => [
+            'provider' => 'tourists',
             'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,

@@ -16,89 +16,100 @@ use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 class Touristcontroller extends Controller
 {
 
-public function login(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'email' => 'required|email',
-        'password' => 'required|min:8',
-    ]);
-    if ($validator->fails()) {
-        return response()->json($validator->errors(), 422);
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $tourist = Tourist::where('email', $request->email)->first();
+        if (! $tourist || ! Hash::check($request->password, $tourist->password)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        $token = JWTAuth::fromUser($tourist);
+        $tourist->access_token = $token;
+        $tourist->save();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'login successfully',
+            'Authentication' => [
+                'access_token' => $this->createNewToken($token),
+                'token_type' => 'Bearer',
+            ],
+            'user' => $tourist
+
+        ]);
     }
 
-    $tourist = Tourist::where('email', $request->email)->first();
-    if (! $tourist || ! Hash::check($request->password, $tourist->password)) {
-        return response()->json(['error' => 'Unauthorized'], 401);
+    public function logout() {
+        auth()->logout();
+        return response()->json(['message' => 'User successfully signed out']);
     }
-    $token = JWTAuth::fromUser($tourist);
-    $tourist->access_token = $token;
-    $tourist->save();
-    return response()->json([
-        'access_token' => $this->createNewToken($token),
-        'token_type' => 'Bearer',
-
-    ]);
-}
-
-public function logout() {
-    auth()->logout();
-    return response()->json(['message' => 'User successfully signed out']);
-}
 
 
 
-public function userProfile() {
-    return response()->json(auth()->user());
-}
+    public function userProfile() {
+        return response()->json(auth()->user());
+    }
 
-protected function createNewToken($token){
-    return response()->json([
-        'access_token' => $token,
-        'user' => auth()->user()
-    ]);
-}
+    protected function createNewToken($token){
+        return response()->json([
+            'access_token' => $token,
+    //        'user' => auth()->user()
+        ]);
+    }
 
 
 
-public function register(Request $request)
+    public function register(Request $request)
     {
 
-    $validator = Validator::make($request->all(), [
-        'first_name' => 'required|string|max:255',
-        'last_name' => 'required|string|max:255',
-        'email' => 'required|string|email|max:255|unique:tourists',
-        'password' => 'required|string|min:6',
-        'SSN' => 'required|string',
-        'phone' => 'required|string',
-        'gender' => 'required|string',
-    ]);
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:tourists',
+            'password' => 'required|string|min:6',
+            'SSN' => 'required|string',
+            'phone' => 'required|string',
+            'gender' => 'required|string',
+        ]);
 
-    if ($validator->fails()) {
-        $errors = new \stdClass();
-        foreach ($validator->errors()->toArray() as $field => $error) {
-            $errors->$field = $error[0];
+        if ($validator->fails()) {
+            $errors = new \stdClass();
+            foreach ($validator->errors()->toArray() as $field => $error) {
+                $errors->$field = $error[0];
+            }
+            return response()->json(['errors' => $errors], 400);
         }
-        return response()->json(['errors' => $errors], 400);
+        $tourist =Tourist::create([
+            'first_name' => $request->get('first_name'),
+            'last_name' => $request->get('last_name'),
+            'SSN' => $request->get('SSN'),
+            'phone' => $request->get('phone'),
+            'gender' => $request->get('gender'),
+            'email' => $request->get('email'),
+            'password' => Hash::make($request->get('password')),
+        ]);
+
+        $token = JWTAuth::fromUser($tourist);
+        $tourist->access_token = $token;
+        $tourist->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'register successfully',
+            'Authentication' => [
+                'access_token' => $this->createNewToken($token),
+                'token_type' => 'Bearer',
+            ],
+            'user' => $tourist,
+    //        'token' => $token,
+        ], 201);
     }
-    $tourist =Tourist::create([
-        'first_name' => $request->get('first_name'),
-        'last_name' => $request->get('last_name'),
-        'SSN' => $request->get('SSN'),
-        'phone' => $request->get('phone'),
-        'gender' => $request->get('gender'),
-        'email' => $request->get('email'),
-        'password' => Hash::make($request->get('password')),
-    ]);
-
-    $token = JWTAuth::fromUser($tourist);
-    $tourist->access_token = $token;
-    $tourist->save();
-
-    return response()->json([
-        'tourist' => $tourist,
-        'token' => $token,
-    ], 201);
-}
 }
 
 

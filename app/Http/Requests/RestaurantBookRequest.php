@@ -2,17 +2,16 @@
 
 namespace App\Http\Requests;
 
-//use HttpResponseException;
+use HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
-class RestaurantBookingRequest extends FormRequest
+class RestaurantBookRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -25,11 +24,11 @@ class RestaurantBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
+//            'tourist_id' => 'required|integer',
             'restaurant_id' => 'required|integer',
-            'people_count' => 'required|integer|min:1|max:10',
-            'booking_date' => 'required|date|date_format:Y-m-d H:i:s',
+            'people_count' => 'required|integer',
+            'booking_date' => 'required|date|date_format:Y-m-d H:i:s'
         ];
-
     }
 
     public function failedValidation(Validator $validator)
@@ -37,8 +36,7 @@ class RestaurantBookingRequest extends FormRequest
         throw new HttpResponseException(response()->json([
             'status' => 'error',
             'message' => 'validation error',
-            'errors' => $validator->errors()
-        ], 400));
+            'errors' => $validator->errors(),
+        ]));
     }
-
 }

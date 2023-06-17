@@ -3,56 +3,85 @@
 namespace App\Http\Controllers\Hotels;
 
 use App\Http\Controllers\Controller;
+use http\Client\Response;
+use http\Exception;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
-use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\Tourist;
 use App\Models\RoomBooking;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+
 class RoomBookingController extends Controller
 {
-//     public function __construct()
-// {
-//     $this->middleware('auth:api');
-// }
+     public function __construct()
+    {
+        $this->middleware('auth:api');
+    }
 public function index()
 {
     $bookings = RoomBooking::all();
 
-    $response = [];
+    $response = [
+        'status' => 'success',
+        'message' => 'all rooms booked',
+        'data' => $bookings
+    ];
 
-    foreach ($bookings as $booking) {
-        $response[] = [
-            'id' => $booking->id,
-            'hotel_id' => $booking->hotel_id,
-            'room_id' => $booking->room_id,
-            'checkin' => $booking->checkin,
-            'checkout' => $booking->checkout,
-            // Add any other fields you want to include in the response
-        ];
-    }
+//    foreach ($bookings as $booking) {
+//        $response[] = [
+//            'id' => $booking->id,
+//            'hotel_id' => $booking->hotel_id,
+//            'room_id' => $booking->room_id,
+//            'checkin' => $booking->checkin,
+//            'checkout' => $booking->checkout,
+//            // Add any other fields you want to include in the response
+//        ];
+//    }
 
     return response()->json($response);
 }
 
-    public function store(Request $request, $hotel_id, $room_id)
+    public function store(Request $request)
     {
         $data = $request->validate([
-            'checkin' => 'required|date',
-            'checkout' => 'required|date',
+            'tourist_id' => 'required|integer',
+            'room_id' => 'required|integer',
+            'check_in' => 'required|date',
+            'check_out' => 'required|date',
             "type"=>'required|string'
         ]);
 
-        $booking = new RoomBooking();
-        // $booking->tourist_id = auth()->id();
-        $booking->hotel_id = $hotel_id;
-        $booking->room_id = $room_id;
-        $booking->checkin = $data['checkin'];
-        $booking->checkout = $data['checkout'];
-        $booking->type =$data['type'];
-        $booking->save();
 
-        return response()->json($booking, 201);
+//    ------------------ room booking --------------------------
+
+//        $is_booked = RoomBooking::isBooked($data['room_id'], $data['check_in'], $data['check_out']);
+//
+//        if ($is_booked) {
+//            throw new HttpResponseException(response()->json([
+//                'status' => 'error',
+//                'message' => 'this room is booked'
+//            ]));
+//        }
+
+//        return $is_booked;
+
+        $booking = RoomBooking::create([
+            'room_id' => $data['room_id'],
+            'tourist_id' => $data['tourist_id'],
+            'type' => $data['type'],
+            'check_in' => $data['check_in'],
+            'check_out' => $data['check_out'],
+        ]);
+
+
+        $response = [
+            'status' => 'success',
+            'message' => 'room booked successfully' ,
+        ];
+
+        return response()->json($response, 201);
     }
 
     public function show($id)
@@ -61,13 +90,14 @@ public function index()
 
         return response()->json([
             'id' => $booking->id,
-            'hotel_id' => $booking->hotel_id,
+            'tourist_id' => $booking->tourist_id,
             'room_id' => $booking->room_id,
             'checkin' => $booking->checkin,
             'checkout' => $booking->checkout,
             'type' => $booking->type,
             // Add any other fields you want to include in the response
         ]);
+
     }
 
 
